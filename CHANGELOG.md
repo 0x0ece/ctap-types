@@ -6,7 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/trussed-dev/ctap-types/compare/0.6.0-rc.3...HEAD
+[Unreleased]: https://github.com/trussed-dev/ctap-types/compare/0.6.0-rc.4...HEAD
+
+## [0.6.0-rc.4] 2026-06-01
+
+[0.6.0-rc.4]: https://github.com/trussed-dev/ctap-types/compare/0.6.0-rc.3...0.6.0-rc.4
 
 - Improve `Authenticator` trait to reduce stack usage.
 
