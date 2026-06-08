@@ -177,7 +177,7 @@ pub struct Response {
     // FIDO_2_3
     #[cfg(feature = "get-info-full")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub authenticator_config_commands: Option<Vec<u8, 4>>,
+    pub authenticator_config_commands: Option<Vec<super::config::Subcommand, 4>>,
 }
 
 impl Default for Response {
@@ -617,83 +617,111 @@ mod tests {
         response.max_creds_in_list = Some(10);
         response.max_cred_id_length = Some(255);
         response.transports = Some(Vec::from_slice(&[Transport::Nfc, Transport::Usb]).unwrap());
-        assert_ser_tokens(
-            &response,
-            &[
-                Token::Map { len: Some(9) },
-                // 0x01: versions
-                Token::U64(0x01),
-                Token::Seq { len: Some(3) },
-                Token::BorrowedStr("U2F_V2"),
-                Token::BorrowedStr("FIDO_2_0"),
-                Token::BorrowedStr("FIDO_2_1"),
-                Token::SeqEnd,
-                // 0x02: extensions
-                Token::U64(0x02),
+
+        #[cfg(feature = "get-info-full")]
+        {
+            response.authenticator_config_commands = Some(
+                Vec::from_slice(&[
+                    crate::ctap2::config::Subcommand::ToggleAlwaysUv,
+                    crate::ctap2::config::Subcommand::SetMinPINLength,
+                ])
+                .unwrap(),
+            );
+        }
+
+        let len = 9 + if cfg!(feature = "get-info-full") {
+            1
+        } else {
+            0
+        };
+
+        let mut expected = vec![
+            Token::Map { len: Some(len) },
+            // 0x01: versions
+            Token::U64(0x01),
+            Token::Seq { len: Some(3) },
+            Token::BorrowedStr("U2F_V2"),
+            Token::BorrowedStr("FIDO_2_0"),
+            Token::BorrowedStr("FIDO_2_1"),
+            Token::SeqEnd,
+            // 0x02: extensions
+            Token::U64(0x02),
+            Token::Some,
+            Token::Seq { len: Some(2) },
+            Token::BorrowedStr("credProtect"),
+            Token::BorrowedStr("hmac-secret"),
+            Token::SeqEnd,
+            // 0x03: aaguid
+            Token::U64(0x03),
+            Token::BorrowedBytes(&AAGUID),
+            // 0x04: options
+            Token::U64(0x04),
+            Token::Some,
+            Token::Struct {
+                name: "CtapOptions",
+                len: 7,
+            },
+            Token::BorrowedStr("rk"),
+            Token::Bool(true),
+            Token::BorrowedStr("up"),
+            Token::Bool(true),
+            Token::BorrowedStr("plat"),
+            Token::Some,
+            Token::Bool(false),
+            Token::BorrowedStr("credMgmt"),
+            Token::Some,
+            Token::Bool(true),
+            Token::BorrowedStr("clientPin"),
+            Token::Some,
+            Token::Bool(false),
+            Token::BorrowedStr("largeBlobs"),
+            Token::Some,
+            Token::Bool(false),
+            Token::BorrowedStr("pinUvAuthToken"),
+            Token::Some,
+            Token::Bool(true),
+            Token::StructEnd,
+            // 0x05: maxMsgSize
+            Token::U64(0x05),
+            Token::Some,
+            Token::U64(3072),
+            // 0x06: pinUvAuthProtocols
+            Token::U64(0x06),
+            Token::Some,
+            Token::Seq { len: Some(2) },
+            Token::U8(1),
+            Token::U8(0),
+            Token::SeqEnd,
+            // 0x07: maxCredentialCountInList
+            Token::U64(0x07),
+            Token::Some,
+            Token::U64(10),
+            // 0x08: maxCredentialIdLength
+            Token::U64(0x08),
+            Token::Some,
+            Token::U64(255),
+            // 0x09: transports
+            Token::U64(0x09),
+            Token::Some,
+            Token::Seq { len: Some(2) },
+            Token::BorrowedStr("nfc"),
+            Token::BorrowedStr("usb"),
+            Token::SeqEnd,
+        ];
+        if cfg!(feature = "get-info-full") {
+            expected.extend([
+                // 0x1F: authenticatorConfigCommands
+                Token::U64(0x1F),
                 Token::Some,
                 Token::Seq { len: Some(2) },
-                Token::BorrowedStr("credProtect"),
-                Token::BorrowedStr("hmac-secret"),
+                Token::U8(0x02),
+                Token::U8(0x03),
                 Token::SeqEnd,
-                // 0x03: aaguid
-                Token::U64(0x03),
-                Token::BorrowedBytes(&AAGUID),
-                // 0x04: options
-                Token::U64(0x04),
-                Token::Some,
-                Token::Struct {
-                    name: "CtapOptions",
-                    len: 7,
-                },
-                Token::BorrowedStr("rk"),
-                Token::Bool(true),
-                Token::BorrowedStr("up"),
-                Token::Bool(true),
-                Token::BorrowedStr("plat"),
-                Token::Some,
-                Token::Bool(false),
-                Token::BorrowedStr("credMgmt"),
-                Token::Some,
-                Token::Bool(true),
-                Token::BorrowedStr("clientPin"),
-                Token::Some,
-                Token::Bool(false),
-                Token::BorrowedStr("largeBlobs"),
-                Token::Some,
-                Token::Bool(false),
-                Token::BorrowedStr("pinUvAuthToken"),
-                Token::Some,
-                Token::Bool(true),
-                Token::StructEnd,
-                // 0x05: maxMsgSize
-                Token::U64(0x05),
-                Token::Some,
-                Token::U64(3072),
-                // 0x06: pinUvAuthProtocols
-                Token::U64(0x06),
-                Token::Some,
-                Token::Seq { len: Some(2) },
-                Token::U8(1),
-                Token::U8(0),
-                Token::SeqEnd,
-                // 0x07: maxCredentialCountInList
-                Token::U64(0x07),
-                Token::Some,
-                Token::U64(10),
-                // 0x08: maxCredentialIdLength
-                Token::U64(0x08),
-                Token::Some,
-                Token::U64(255),
-                // 0x09: transports
-                Token::U64(0x09),
-                Token::Some,
-                Token::Seq { len: Some(2) },
-                Token::BorrowedStr("nfc"),
-                Token::BorrowedStr("usb"),
-                Token::SeqEnd,
-                Token::MapEnd,
-            ],
-        );
+            ]);
+        }
+        expected.push(Token::MapEnd);
+
+        assert_ser_tokens(&response, &expected);
     }
 
     #[test]
