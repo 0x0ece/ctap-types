@@ -53,7 +53,7 @@ pub enum Request<'a> {
     Vendor(crate::operation::VendorOperation),
 }
 
-pub enum CtapMappingError {
+enum CtapMappingError {
     InvalidCommand(u8),
     ParsingError(cbor_smol::Error),
 }

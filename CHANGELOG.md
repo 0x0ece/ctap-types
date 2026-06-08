@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove unused `Rpc` trait.
 - Remove `cbor-smol` re-export as `serde`.
+- Make `ctap2::CtapMappingError` private.
 
 ## [0.6.0-rc.4] 2026-06-01
 
