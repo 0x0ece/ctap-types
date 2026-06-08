@@ -444,6 +444,7 @@ impl<'de> Deserialize<'de> for AttestationFormatsPreference {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[non_exhaustive]
+#[repr(u8)]
 pub enum Error {
     Success = 0x00,
     InvalidCommand = 0x01,
@@ -500,6 +501,12 @@ pub enum Error {
     ExtensionLast = 0xEF,
     VendorFirst = 0xF0,
     VendorLast = 0xFF,
+}
+
+impl From<Error> for u8 {
+    fn from(error: Error) -> u8 {
+        error as _
+    }
 }
 
 /// CTAP2 authenticator API
