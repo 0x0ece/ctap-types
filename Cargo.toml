@@ -27,6 +27,7 @@ ciborium = "0.2"
 hex = "0.4"
 hex-literal = "0.4.1"
 serde_test = "1.0.176"
+strum = { version = "0.28", features = ["derive"] }
 
 [features]
 std = []

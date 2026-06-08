@@ -137,6 +137,7 @@ impl PublicKeyCredentialUserEntity {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(test, derive(strum::EnumCount, strum::VariantArray))]
 #[non_exhaustive]
 pub enum KnownPublicKeyCredentialParameters {
     ES256,
@@ -289,6 +290,16 @@ pub struct PublicKeyCredentialDescriptorRef<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use strum::{EnumCount as _, VariantArray as _};
+
+    #[test]
+    fn test_known_cred_params() {
+        assert_eq!(KnownPublicKeyCredentialParameters::COUNT, COUNT_KNOWN_ALGS);
+        assert_eq!(
+            KnownPublicKeyCredentialParameters::ALL,
+            KnownPublicKeyCredentialParameters::VARIANTS
+        );
+    }
 
     #[test]
     fn test_truncate() {

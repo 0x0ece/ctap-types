@@ -258,6 +258,7 @@ impl ResponseBuilder {
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(test, derive(strum::EnumCount, strum::VariantArray))]
 #[non_exhaustive]
 #[serde(into = "&str", try_from = "&str")]
 pub enum Version {
@@ -308,6 +309,7 @@ impl TryFrom<&str> for Version {
 pub const EXTENSION_COUNT: usize = 7;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(test, derive(strum::EnumCount, strum::VariantArray))]
 #[non_exhaustive]
 #[serde(into = "&str", try_from = "&str")]
 pub enum Extension {
@@ -364,6 +366,7 @@ impl TryFrom<&str> for Extension {
 pub const TRANSPORT_COUNT: usize = 3;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(test, derive(strum::EnumCount, strum::VariantArray))]
 #[non_exhaustive]
 #[serde(into = "&str", try_from = "&str")]
 pub enum Transport {
@@ -526,7 +529,42 @@ pub struct Certifications {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use core::fmt::Debug;
     use serde_test::{assert_ser_tokens, assert_tokens, Token};
+    use strum::{EnumCount, VariantArray};
+
+    fn test_enum<T>(count: usize)
+    where
+        T: EnumCount
+            + VariantArray
+            + Into<&'static str>
+            + for<'a> TryFrom<&'a str>
+            + PartialEq
+            + Debug
+            + Copy,
+    {
+        assert_eq!(count, T::COUNT);
+
+        for variant in T::VARIANTS {
+            let variant_str: &str = (*variant).into();
+            assert_eq!(Some(*variant), T::try_from(variant_str).ok());
+        }
+    }
+
+    #[test]
+    fn test_version() {
+        test_enum::<Version>(VERSION_COUNT);
+    }
+
+    #[test]
+    fn test_transport() {
+        test_enum::<Transport>(TRANSPORT_COUNT);
+    }
+
+    #[test]
+    fn test_extension() {
+        test_enum::<Extension>(EXTENSION_COUNT);
+    }
 
     #[test]
     fn test_serde_version() {
