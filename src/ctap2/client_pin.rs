@@ -512,7 +512,7 @@ mod tests {
         // The following test would then fail, as [1] != [2]
         let mut buf = [0u8; 64];
         let example = PinV1Subcommand::GetKeyAgreement;
-        let ser = crate::serde::cbor_serialize(&example, &mut buf).unwrap();
+        let ser = cbor_smol::cbor_serialize(&example, &mut buf).unwrap();
         assert_eq!(ser, &[0x02]);
     }
 }

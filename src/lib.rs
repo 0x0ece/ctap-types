@@ -31,7 +31,6 @@ pub mod authenticator;
 pub mod ctap1;
 pub mod ctap2;
 pub(crate) mod operation;
-pub use cbor_smol as serde;
 pub mod sizes;
 #[cfg(test)]
 mod test;

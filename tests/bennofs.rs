@@ -1,4 +1,4 @@
-use ctap_types::serde::{cbor_deserialize, cbor_serialize};
+use cbor_smol::{cbor_deserialize, cbor_serialize};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
