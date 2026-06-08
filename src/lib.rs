@@ -25,7 +25,7 @@ pub use serde_bytes::ByteArray;
 
 #[cfg(feature = "arbitrary")]
 mod arbitrary;
-pub mod authenticator;
+mod authenticator;
 pub mod ctap1;
 pub mod ctap2;
 pub(crate) mod operation;
@@ -34,6 +34,7 @@ pub mod sizes;
 mod test;
 pub mod webauthn;
 
+pub use authenticator::{Authenticator, Request, Response};
 pub use ctap2::{Error, Result};
 
 use core::fmt::{self, Display, Formatter};
