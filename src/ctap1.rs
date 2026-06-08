@@ -255,13 +255,6 @@ pub trait Authenticator {
     }
 }
 
-impl<A: Authenticator> crate::Rpc<Error, Request<'_>, Response> for A {
-    /// Dispatches the enum of possible requests into the appropriate trait method.
-    fn call(&mut self, request: &Request<'_>) -> Result<Response> {
-        self.call_ctap1(request)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

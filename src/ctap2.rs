@@ -503,9 +503,6 @@ pub enum Error {
 }
 
 /// CTAP2 authenticator API
-///
-/// Note that all Authenticators automatically implement [`crate::Rpc`] with [`Request`] and
-/// [`Response`].
 pub trait Authenticator {
     fn get_info(&mut self) -> get_info::Response;
 

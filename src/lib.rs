@@ -51,8 +51,3 @@ impl Display for TryFromStrError {
         "invalid enum value".fmt(f)
     }
 }
-
-/// Call a remote procedure with a request, receive a response, maybe.
-pub trait Rpc<Error, Request, Response> {
-    fn call(&mut self, request: &Request) -> core::result::Result<Response, Error>;
-}
