@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ctap2::get_info`: Use `ByteArray<16>` instead of `Bytes<16>` for AAGUID.
 - Remove re-exports for `heapless` and `heapless-bytes` as the relevant types are already re-exported.
 - `ctap2::get_info`: Use subcommand enum for `authenticator_config_commands`.
+- `webauthn`: Make `KnownPublicKeyCredentialParameters` an enum.
 
 ## [0.6.0-rc.4] 2026-06-01
 

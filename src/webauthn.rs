@@ -135,15 +135,29 @@ impl PublicKeyCredentialUserEntity {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct KnownPublicKeyCredentialParameters {
-    pub alg: i32,
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[non_exhaustive]
+pub enum KnownPublicKeyCredentialParameters {
+    ES256,
+    EdDSA,
+}
+
+impl KnownPublicKeyCredentialParameters {
+    pub const ALL: [Self; COUNT_KNOWN_ALGS] = [Self::ES256, Self::EdDSA];
+
+    pub fn alg(&self) -> i32 {
+        match self {
+            Self::ES256 => ES256,
+            Self::EdDSA => ED_DSA,
+        }
+    }
 }
 
 impl From<KnownPublicKeyCredentialParameters> for PublicKeyCredentialParameters {
     fn from(value: KnownPublicKeyCredentialParameters) -> Self {
         Self {
-            alg: value.alg,
+            alg: value.alg(),
             key_type: String::try_from("public-key").unwrap(),
         }
     }
@@ -155,12 +169,11 @@ pub enum UnknownPKCredentialParam {
 }
 
 /// ECDSA w/ SHA-256
-pub const ES256: i32 = -7;
+const ES256: i32 = -7;
 /// EdDSA
-pub const ED_DSA: i32 = -8;
+const ED_DSA: i32 = -8;
 
 pub const COUNT_KNOWN_ALGS: usize = 2;
-pub const KNOWN_ALGS: [i32; COUNT_KNOWN_ALGS] = [ES256, ED_DSA];
 
 impl TryFrom<PublicKeyCredentialParameters> for KnownPublicKeyCredentialParameters {
     type Error = UnknownPKCredentialParam;
@@ -168,10 +181,12 @@ impl TryFrom<PublicKeyCredentialParameters> for KnownPublicKeyCredentialParamete
     fn try_from(value: PublicKeyCredentialParameters) -> Result<Self, Self::Error> {
         if value.key_type != "public-key" {
             Err(UnknownPKCredentialParam::UnknownType)
-        } else if KNOWN_ALGS.contains(&value.alg) {
-            Ok(Self { alg: value.alg })
         } else {
-            Err(UnknownPKCredentialParam::UnknownAlg)
+            match value.alg {
+                ES256 => Ok(Self::ES256),
+                ED_DSA => Ok(Self::EdDSA),
+                _ => Err(UnknownPKCredentialParam::UnknownAlg),
+            }
         }
     }
 }
@@ -190,7 +205,7 @@ impl Serialize for FilteredPublicKeyCredentialParameters {
         use serde::ser::SerializeSeq;
         let mut seq = serializer.serialize_seq(Some(self.0.len()))?;
         for element in &self.0 {
-            let el: PublicKeyCredentialParameters = element.clone().into();
+            let el = PublicKeyCredentialParameters::from(*element);
             seq.serialize_element(&el)?
         }
         seq.end()

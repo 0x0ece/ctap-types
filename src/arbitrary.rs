@@ -235,14 +235,6 @@ impl<'a> Arbitrary<'a> for webauthn::FilteredPublicKeyCredentialParameters {
     }
 }
 
-// cannot be derived because we want to make sure that we have valid values
-impl<'a> Arbitrary<'a> for webauthn::KnownPublicKeyCredentialParameters {
-    fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
-        let alg = *u.choose(&webauthn::KNOWN_ALGS)?;
-        Ok(Self { alg })
-    }
-}
-
 // cannot be derived because of missing impl for serde_bytes::Bytes
 impl<'a> Arbitrary<'a> for webauthn::PublicKeyCredentialDescriptorRef<'a> {
     fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
