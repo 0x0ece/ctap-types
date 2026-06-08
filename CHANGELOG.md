@@ -6,7 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/trussed-dev/ctap-types/compare/0.6.0-rc.4...HEAD
+[Unreleased]: https://github.com/trussed-dev/ctap-types/compare/0.6.0-rc.5...HEAD
+
+-
+
+## [0.6.0-rc.5] 2026-06-08
+
+[0.6.0-rc.5]: https://github.com/trussed-dev/ctap-types/compare/0.6.0-rc.4...0.6.0-rc.5
 
 - Remove unused `Rpc` trait.
 - Remove `cbor-smol` re-export as `serde`.
