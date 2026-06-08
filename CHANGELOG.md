@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Make `ctap2::CtapMappingError` private.
 - Set `#[repr(u8)]` for `ctap2::Error` and implement `From<ctap2::Error>` for `u8`.
 - `ctap2::get_info`: Use `ByteArray<16>` instead of `Bytes<16>` for AAGUID.
+- Remove re-exports for `heapless` and `heapless-bytes` as the relevant types are already re-exported.
 
 ## [0.6.0-rc.4] 2026-06-01
 
