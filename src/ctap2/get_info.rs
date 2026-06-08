@@ -1,8 +1,9 @@
 use crate::webauthn::FilteredPublicKeyCredentialParameters;
 #[cfg(feature = "get-info-full")]
 use crate::String;
-use crate::{Bytes, TryFromStrError, Vec};
+use crate::{TryFromStrError, Vec};
 use serde::{Deserialize, Serialize};
+use serde_bytes::ByteArray;
 use serde_indexed::{DeserializeIndexed, SerializeIndexed};
 
 pub type AuthenticatorInfo = Response;
@@ -19,7 +20,7 @@ pub struct Response {
     pub extensions: Option<Vec<Extension, EXTENSION_COUNT>>,
 
     // 0x03
-    pub aaguid: Bytes<16>,
+    pub aaguid: ByteArray<16>,
 
     // 0x04
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -181,13 +182,8 @@ pub struct Response {
 
 impl Default for Response {
     fn default() -> Self {
-        let mut zero_aaguid = Vec::<u8, 16>::new();
-        zero_aaguid.resize_default(16).unwrap();
-        let mut aaguid = Bytes::new();
-        aaguid.resize_zero(16).unwrap();
-
         let mut response = ResponseBuilder {
-            aaguid,
+            aaguid: ByteArray::new([0; 16]),
             versions: Vec::new(),
         }
         .build();
@@ -199,7 +195,7 @@ impl Default for Response {
 #[derive(Debug)]
 pub struct ResponseBuilder {
     pub versions: Vec<Version, VERSION_COUNT>,
-    pub aaguid: Bytes<16>,
+    pub aaguid: ByteArray<16>,
 }
 
 impl ResponseBuilder {
@@ -577,7 +573,7 @@ mod tests {
     #[test]
     fn test_serde_get_info_minimal() {
         let versions = Vec::from_slice(&[Version::Fido2_0, Version::Fido2_1]).unwrap();
-        let aaguid = Bytes::try_from(&[0xff; 16]).unwrap();
+        let aaguid = ByteArray::new([0xff; 16]);
         let response = ResponseBuilder { versions, aaguid }.build();
         assert_tokens(
             &response,
@@ -599,12 +595,12 @@ mod tests {
     fn test_serde_get_info_default() {
         // This corresponds to the response sent by the Nitrokey 3, see for example:
         // https://github.com/Nitrokey/nitrokey-3-firmware/blob/0d7209f1f75354878c0cf3454055defe8372ed14/utils/fido2-mds/metadata/v4/metadata-nk3xn-v4.json
-        const AAGUID: &[u8] = &[
+        const AAGUID: [u8; 16] = [
             236, 153, 219, 25, 205, 31, 76, 6, 162, 169, 148, 15, 23, 166, 163, 11,
         ];
         let versions =
             Vec::from_slice(&[Version::U2fV2, Version::Fido2_0, Version::Fido2_1]).unwrap();
-        let aaguid = Bytes::try_from(AAGUID).unwrap();
+        let aaguid = ByteArray::new(AAGUID);
         let mut options = CtapOptions::default();
         options.rk = true;
         options.plat = Some(false);
@@ -641,7 +637,7 @@ mod tests {
                 Token::SeqEnd,
                 // 0x03: aaguid
                 Token::U64(0x03),
-                Token::BorrowedBytes(AAGUID),
+                Token::BorrowedBytes(&AAGUID),
                 // 0x04: options
                 Token::U64(0x04),
                 Token::Some,
